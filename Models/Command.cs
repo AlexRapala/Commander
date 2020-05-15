@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Commander.Models
 {
@@ -15,6 +16,5 @@ namespace Commander.Models
 
         [Required]
         public string Platform { get; set; }
-
     }
 }

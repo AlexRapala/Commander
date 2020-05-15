@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Commander.Data;
 using Commander.Options;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +38,16 @@ namespace Commander
                 Configuration.GetConnectionString("CoommanderConnection")
             ));
 
-            services.AddControllers().AddNewtonsoftJson(s =>
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<CommanderContext>()
+                .AddDefaultTokenProviders();
+
+            services.ConfigureApplicationCookie(config =>
+            {
+                config.LoginPath = "/Home/Login";
+            });
+
+            services.AddControllersWithViews().AddNewtonsoftJson(s =>
             {
                 s.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
@@ -63,9 +74,15 @@ namespace Commander
 
             app.UseHttpsRedirection();
 
+
             app.UseRouting();
 
+            // Who are you?
+            app.UseAuthentication();
+
+            // Are you allowed?
             app.UseAuthorization();
+
 
             var swaggerOptions = new SwaggerOptions();
 
@@ -81,10 +98,10 @@ namespace Commander
                 option.SwaggerEndpoint(swaggerOptions.UiEndpoint, swaggerOptions.Description);
             });
 
+
             app.UseEndpoints(endpoints =>
             {
-                Console.Write(endpoints);
-                endpoints.MapControllers();
+                endpoints.MapDefaultControllerRoute();
             });
         }
     }
